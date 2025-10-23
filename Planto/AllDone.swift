@@ -1,134 +1,135 @@
+//
+//  AllDoneView.swift
+//  Planto
+//
+//  MVVM - View Layer (Completion Screen)
+//
+
 import SwiftUI
 
-struct AllDone: View {
+struct AllDoneView: View {
+    // MARK: - ViewModel
+    @EnvironmentObject var viewModel: PlantsViewModel
+    
+    // MARK: - Environment
+    @Environment(\.dismiss) var dismiss
+    
+    // MARK: - State Properties
     @State private var showSetReminderSheet = false
     @State private var navigateToTodayReminder = false
-    @Environment(\.dismiss) var dismiss
-
-    @Binding var plants: [Plant]
-
     @State private var editingPlant: Plant? = nil
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                VStack(spacing: 0) {
-                    // Title
-                    HStack {
-                        Text("My Plants 🌱")
-                            .font(.largeTitle)
-                            .foregroundStyle(.white)
-                            .bold()
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+        ZStack {
+            // MARK: - Background
+            Color.black.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // MARK: - Title
+                HStack {
+                    Text("My Plants 🌱")
+                        .font(.largeTitle)
+                        .foregroundStyle(.white)
+                        .bold()
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
+                
+                // MARK: - Divider
+                Divider()
+                    .background(Color.gray.opacity(0.9))
+                    .padding(.top, -1)
+                
+                Spacer(minLength: 20)
+                
+                // MARK: - Celebration Image
+                Image("plantoIMGwink")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 164, maxHeight: 200)
+                    .padding(.top, 10)
+                
+                // MARK: - Celebration Text
+                VStack(spacing: 10) {
+                    Text("All Done! 🎉")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
-                        .padding(.top, 16)
-                        .padding(.bottom, 8)
-
-                        Divider()
-                            .background(Color.gray.opacity(0.9))
-                            .padding(.top, -1)
-                            
-                        Spacer(minLength: 20)
-
-                        Image("plantoIMGwink")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: 164 ,maxHeight: 200)
-                            .padding(.top, 10)
-                    // Title and subtitle
-                    VStack(spacing: 10) {
-                        Text("All Done! 🎉")
+                    
+                    Text("All Reminders Completed")
+                        .foregroundColor(.gray)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.top, 1)
+                }
+                .padding(.top, 28)
+                
+                Spacer()
+            }
+            
+            // MARK: - Floating Action Button
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showSetReminderSheet = true
+                    }) {
+                        Image(systemName: "plus")
                             .font(.title2)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 16)
-                        
-                        Text("All Reminders Completed")
-                            .foregroundColor(.gray)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
-                            .padding(.top,1)
+                            .frame(width: 56, height: 56)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                            .tint(.green)
                     }
-                    .padding(.top, 28)
+                    .glassEffect(.clear)
+                    .padding(.trailing, 24)
+                    .padding(.bottom, 24)
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .preferredColorScheme(.dark)
+        // MARK: - Add New Plant Sheet
+        .sheet(isPresented: $showSetReminderSheet) {
+            SetReminderView(viewModel: viewModel)
+                .onDisappear {
+                    // When user adds a new plant from AllDone page
+                    guard let newPlant = viewModel.plants.last else { return }
                     
-                    Spacer()
-                }
-                
-                // Floating add button
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            showSetReminderSheet = true
-                        }) {
-                            Image(systemName: "plus")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .frame(width: 56, height: 56)
-                                
-                            //.background(Color(hex: 0x28E0A8))
-                              
-                              
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
-                                .tint(.green)
-                            
-
-                        }
-                        .glassEffect(.clear)
-                        
-                        .padding(.trailing, 24)
-                        .padding(.bottom, 24)
-                    }
-                }
-            } // Close ZStack
-            
-            .sheet(isPresented: $showSetReminderSheet) {
-                setreminder { newPlant in
-                    // Clear all old plants and only keep the new one
-                    plants = [newPlant]
+                    // Keep only the newly added plant WITHOUT resetting navigation flags
+                    viewModel.plants = [newPlant]
                     
-                    showSetReminderSheet = false
-                    DispatchQueue.main.async {
-                        navigateToTodayReminder = true
-                    }
+                    // Ensure we are not stuck on AllDone and that TodayReminder stays visible
+                    viewModel.shouldShowAllDone = false
+                    viewModel.shouldShowTodayReminder = true
+                    
+                    // Close the sheet (not the navigation)
+                    // (dismiss here dismisses the sheet scope automatically after onDisappear)
                 }
-            }
-            .sheet(item: $editingPlant) { plant in
-                setreminderDEL(
-                    onSave: { updatedPlant in
-                        if let index = plants.firstIndex(where: { $0.id == plant.id }) {
-                            plants[index] = updatedPlant
-                        }
-                    },
-                    onDelete: {
-                        if let index = plants.firstIndex(where: { $0.id == plant.id }) {
-                            plants.remove(at: index)
-                        }
-                        editingPlant = nil
-                    },
-                    existingPlant: plant
-                )
-            }
-            .navigationDestination(isPresented: $navigateToTodayReminder) {
-                TodayReminder(plants: $plants)  // Navigate to TodayReminder
-                    .navigationBarBackButtonHidden(true)
-            }
-            .preferredColorScheme(.dark)
-        } // Close NavigationStack
+        }
+        // MARK: - Edit Plant Sheet
+        .sheet(item: $editingPlant) { plant in
+            SetReminderEditView(
+                viewModel: viewModel,
+                existingPlant: plant,
+                onDelete: {
+                    viewModel.deletePlant(withId: plant.id)
+                    editingPlant = nil
+                }
+            )
+        }
     }
 }
 
-#Preview {
-    AllDone(plants: .constant([]))
-}
-
-// MARK: - Color hex convenience
+// MARK: - Color Extension
 private extension Color {
     init(hex rgb: UInt32, alpha: Double = 1.0) {
         let r = Double((rgb & 0xFF0000) >> 16) / 255.0
@@ -136,4 +137,9 @@ private extension Color {
         let b = Double(rgb & 0x0000FF) / 255.0
         self = Color(red: r, green: g, blue: b).opacity(alpha)
     }
+}
+
+#Preview {
+    AllDoneView()
+        .environmentObject(PlantsViewModel())
 }

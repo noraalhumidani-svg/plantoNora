@@ -1,16 +1,28 @@
+//
+//  ContentView.swift
+//  Planto
+//
+//  MVVM - View Layer (Splash Screen)
+//
+
 import SwiftUI
 
 struct ContentView: View {
+    // MARK: - ViewModel
+    @StateObject private var viewModel = PlantsViewModel()
+    
+    // MARK: - State Properties
     @State private var showSetReminderSheet = false
-    @State private var navigateToTodayReminder = false  // ADD THIS
-    @State private var plants: [Plant] = []  // ADD THIS to store plants
     
     var body: some View {
-        NavigationStack {  // WRAP everything in NavigationStack
+        NavigationStack {
             ZStack {
-                // Your existing content
+                // Background
+                Color.black.ignoresSafeArea()
+                
+                // Main content
                 VStack(spacing: 0) {
-                    // Title
+                    // MARK: - Title
                     HStack {
                         Text("My Plants 🌱")
                             .font(.largeTitle)
@@ -24,20 +36,21 @@ struct ContentView: View {
                     
                     Spacer(minLength: 24)
                     
+                    // MARK: - Divider
                     Divider()
                         .background(Color.gray.opacity(0.9))
                         .padding(.top, -100)
                    
-                    // Image
+                    // MARK: - Plant Image
                     Image("plantoIMG")
                         .resizable()
                         .scaledToFit()
-                        .frame(maxWidth: 164 ,maxHeight: 200)
+                        .frame(maxWidth: 164, maxHeight: 200)
                         .padding(.top, 8)
                     
                     Spacer(minLength: 24)
                     
-                    // Title and subtitle
+                    // MARK: - Welcome Text
                     VStack(spacing: 10) {
                         Text("Start your plant journey!")
                             .font(.title2)
@@ -57,7 +70,7 @@ struct ContentView: View {
                     
                     Spacer()
                     
-                    // Button
+                    // MARK: - Set Reminder Button
                     Button(action: {
                         showSetReminderSheet = true
                     }) {
@@ -65,7 +78,7 @@ struct ContentView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
-                            .frame(maxWidth: 280 , maxHeight: 8)
+                            .frame(maxWidth: 280, maxHeight: 8)
                             .padding()
                             .background(
                                 RoundedRectangle(cornerRadius: 25)
@@ -77,20 +90,15 @@ struct ContentView: View {
                     }
                     .padding(.bottom, 110)
                     .sheet(isPresented: $showSetReminderSheet) {
-                        setreminder { newPlant in
-                            plants.append(newPlant)  // Save the plant
-                            navigateToTodayReminder = true  // Trigger navigation
-                        }
+                        SetReminderView(viewModel: viewModel)
                     }
-                    
                 }
             }
-            .navigationDestination(isPresented: $navigateToTodayReminder) {
-                TodayReminder(plants: $plants)
+            .navigationDestination(isPresented: $viewModel.shouldShowTodayReminder) {
+                TodayReminderView()
+                    .environmentObject(viewModel)
                     .navigationBarBackButtonHidden(true)
             }
-            
-
             .preferredColorScheme(.dark)
         }
     }

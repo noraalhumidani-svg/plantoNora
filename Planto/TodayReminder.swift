@@ -1,36 +1,30 @@
 //
-//  TodayReminder.swift
+//  TodayReminderView.swift
 //  Planto
 //
-//  Created by Nora Abdullah Alhumaydani on 28/04/1447 AH.
+//  MVVM - View Layer (Today's Plants List)
 //
 
 import SwiftUI
 
-struct TodayReminder: View {
+struct TodayReminderView: View {
+    
+    @EnvironmentObject var viewModel: PlantsViewModel
+    
+   
     @Environment(\.dismiss) var dismiss
-
-    @Binding var plants: [Plant]
-    @State private var showAllDone = false   // ✅ For navigation to AllDone
-
+    
+  
     @State private var editingPlant: Plant? = nil
-    @State private var selectedPlant: Plant?
     @State private var showingSetReminder = false
-
-    private var wateredCount: Int {
-        plants.filter { $0.isWatered }.count
-    }
-
-    private var progressPercentage: Double {
-        guard !plants.isEmpty else { return 0 }
-        return Double(wateredCount) / Double(plants.count)
-    }
-
+    
     var body: some View {
         ZStack {
+           
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
+               
                 VStack(alignment: .leading, spacing: 8) {
                     Text("My Plants 🌱")
                         .font(.largeTitle)
@@ -42,24 +36,26 @@ struct TodayReminder: View {
                 .padding(.top, 16)
                 .padding(.bottom, 8)
                 
+              
                 VStack(spacing: 12) {
-                    Text(wateredCount == 0
-                         ? "Your plants are waiting for a sip 💦"
-                         : "\(wateredCount) of your plants feel loved today ✨")
-                    .font(.body)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    
+                    Text(viewModel.statusMessage)
+                        .font(.body)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                  
+              
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
+                            // Background bar
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color.gray.opacity(0.3))
                                 .frame(height: 8)
                             
+                            // Filled progress bar
                             RoundedRectangle(cornerRadius: 4)
                                 .foregroundColor(Color(hex: 0x28E0A8))
-                                .frame(width: geometry.size.width * progressPercentage, height: 8)
-                                .animation(.easeOut(duration: 0.5), value: progressPercentage)
+                                .frame(width: geometry.size.width * viewModel.progressPercentage, height: 8)
+                                .animation(.easeOut(duration: 0.5), value: viewModel.progressPercentage)
                         }
                     }
                     .frame(height: 8)
@@ -67,34 +63,44 @@ struct TodayReminder: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 24)
                 
+                // MARK: - Plant List
                 List {
-                    ForEach(plants.indices, id: \.self) { index in
+                    ForEach(viewModel.plants.indices, id: \.self) { index in
                         PlantRow(
-                            plant: $plants[index],
+                            plant: viewModel.plants[index],
                             onToggle: {
-                                plants[index].isWatered.toggle()
-                                
-                                // ✅ Navigate to AllDone if all are watered
-                                if plants.allSatisfy({ $0.isWatered }) {
-                                    showAllDone = true
-                                }
+                                viewModel.toggleWatered(at: index)
                             }
                         )
                         .onTapGesture {
-                            editingPlant = plants[index]
+                            editingPlant = viewModel.plants[index]
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
-                                plants.remove(at: index)
-                                if plants.isEmpty {
-                                    dismiss()
-                                }
+                                viewModel.deletePlant(at: index)
+                                // Do NOT dismiss when last plant is deleted; keep user on this screen.
+                                // If you want, you can show an empty state when plants.isEmpty.
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .listRowSeparator(.hidden)
+                    }
+                    
+                    // Optional: Empty state row
+                    if viewModel.plants.isEmpty {
+                        VStack(spacing: 8) {
+                            Text("No plants yet")
+                                .font(.headline)
+                                .foregroundColor(.white.opacity(0.9))
+                            Text("Tap + to add a plant reminder")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                     }
                 }
@@ -104,6 +110,7 @@ struct TodayReminder: View {
                 Spacer()
             }
             
+            // MARK: - Floating Action Button
             VStack {
                 Spacer()
                 HStack {
@@ -126,126 +133,113 @@ struct TodayReminder: View {
                 }
             }
         }
+      
         .sheet(isPresented: $showingSetReminder) {
-            setreminder { newPlant in
-                plants.append(newPlant)
-            }
+            SetReminderView(viewModel: viewModel)
         }
         .sheet(item: $editingPlant) { plant in
-            setreminderDEL(
-                onSave: { updatedPlant in
-                    if let index = plants.firstIndex(where: { $0.id == plant.id }) {
-                        plants[index] = updatedPlant
-                    }
-                },
+            SetReminderEditView(
+                viewModel: viewModel,
+                existingPlant: plant,
                 onDelete: {
-                    if let index = plants.firstIndex(where: { $0.id == plant.id }) {
-                        plants.remove(at: index)
-                    }
+                    viewModel.deletePlant(withId: plant.id)
                     editingPlant = nil
-                    if plants.isEmpty {
-                        dismiss()
-                    }
-
-                },
-                existingPlant: plant
+                    // Do not dismiss the TodayReminderView
+                }
             )
-            
         }
-
-        // ✅ Navigation to AllDone page
-        .navigationDestination(isPresented: $showAllDone) {
-            AllDone(plants: $plants)
+        .navigationDestination(isPresented: $viewModel.shouldShowAllDone) {
+            AllDoneView()
+                .environmentObject(viewModel)
+                .navigationBarBackButtonHidden(true)
         }
-
-
         .preferredColorScheme(.dark)
     }
+}
 
-    struct PlantRow: View {
-        @Binding var plant: Plant
-        let onToggle: () -> Void
-        
-        var body: some View {
-            HStack(alignment: .top, spacing: 16) {
-                Button(action: {
-                    onToggle()
-                }) {
-                    ZStack {
-                        Circle()
-                            .strokeBorder(
-                                plant.isWatered ? Color.cyan : Color.gray.opacity(0.5),
-                                lineWidth: 2
-                            )
-                            .background(
-                                Circle().fill(plant.isWatered ? Color(hex: 0x28E0A8) : Color.clear)
-                            )
-                            .frame(width: 24, height: 24)
-                        
-                        if plant.isWatered {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.black)
-                        }
+// MARK: - Plant Row Component
+struct PlantRow: View {
+    let plant: Plant
+    let onToggle: () -> Void
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 16) {
+            // MARK: - Checkbox
+            Button(action: {
+                onToggle()
+            }) {
+                ZStack {
+                    Circle()
+                        .strokeBorder(
+                            plant.isWatered ? Color.cyan : Color.gray.opacity(0.5),
+                            lineWidth: 2
+                        )
+                        .background(
+                            Circle().fill(plant.isWatered ? Color(hex: 0x28E0A8) : Color.clear)
+                        )
+                        .frame(width: 24, height: 24)
+                    
+                    if plant.isWatered {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.black)
                     }
                 }
-                .buttonStyle(PlainButtonStyle())
-                .animation(.easeInOut(duration: 0.2), value: plant.isWatered)
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "location.fill")
-                            .font(.system(size: 12))
-                        Text("in \(plant.location)")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                    
-                    Text(plant.name)
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                    
-                    HStack(spacing: 12) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "sun.max.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(Color(hex: 0xCCC785))
-                            Text(plant.sunlight)
-                                .font(.caption)
-                                .foregroundColor(Color(hex: 0xCCC785))
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(4)
-                        .foregroundColor(.white)
-                        
-                        HStack(spacing: 4) {
-                            Image(systemName: "drop.fill")
-                                .font(.system(size: 12))
-                            Text(plant.waterAmount)
-                                .font(.caption)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(4)
-                        .foregroundColor(Color(hex: 0xCAF3FB))
-                    }
-                }
-                
-                Spacer()
             }
-            .padding(.vertical, 16)
+            .buttonStyle(PlainButtonStyle())
+            .animation(.easeInOut(duration: 0.2), value: plant.isWatered)
+            
+            // MARK: - Plant Details
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 4) {
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 12))
+                    Text("in \(plant.location)")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                
+                Text(plant.name)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
+                
+                HStack(spacing: 12) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sun.max.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(hex: 0xCCC785))
+                        Text(plant.sunlight)
+                            .font(.caption)
+                            .foregroundColor(Color(hex: 0xCCC785))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(4)
+                    .foregroundColor(.white)
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "drop.fill")
+                            .font(.system(size: 12))
+                        Text(plant.waterAmount)
+                            .font(.caption)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(4)
+                    .foregroundColor(Color(hex: 0xCAF3FB))
+                }
+            }
+            
+            Spacer()
         }
+        .padding(.vertical, 16)
     }
 }
 
-#Preview {
-    TodayReminder(plants: .constant([]))
-}
-
+// MARK: - Color Extension
 private extension Color {
     init(hex rgb: UInt32, alpha: Double = 1.0) {
         let r = Double((rgb & 0xFF0000) >> 16) / 255.0
@@ -253,4 +247,9 @@ private extension Color {
         let b = Double(rgb & 0x0000FF) / 255.0
         self = Color(red: r, green: g, blue: b).opacity(alpha)
     }
+}
+
+#Preview {
+    TodayReminderView()
+        .environmentObject(PlantsViewModel())
 }
