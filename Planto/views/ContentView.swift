@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    // MARK: - ViewModel
-    @StateObject private var viewModel = PlantsViewModel()
     
-    // MARK: - State Properties
+    @StateObject private var viewModel = PlantsViewModel()
+    @Environment(\.modelContext) private var context
+    
     @State private var showSetReminderSheet = false
     
     var body: some View {
@@ -22,7 +23,7 @@ struct ContentView: View {
                 
                 // Main content
                 VStack(spacing: 0) {
-                    // MARK: - Title
+                   
                     HStack {
                         Text("My Plants 🌱")
                             .font(.largeTitle)
@@ -36,12 +37,12 @@ struct ContentView: View {
                     
                     Spacer(minLength: 24)
                     
-                    // MARK: - Divider
+                   
                     Divider()
                         .background(Color.gray.opacity(0.9))
                         .padding(.top, -100)
                    
-                    // MARK: - Plant Image
+                   
                     Image("plantoIMG")
                         .resizable()
                         .scaledToFit()
@@ -50,7 +51,7 @@ struct ContentView: View {
                     
                     Spacer(minLength: 24)
                     
-                    // MARK: - Welcome Text
+                   
                     VStack(spacing: 10) {
                         Text("Start your plant journey!")
                             .font(.title2)
@@ -70,7 +71,7 @@ struct ContentView: View {
                     
                     Spacer()
                     
-                    // MARK: - Set Reminder Button
+                  
                     Button(action: {
                         showSetReminderSheet = true
                     }) {
@@ -82,7 +83,9 @@ struct ContentView: View {
                             .padding()
                             .background(
                                 RoundedRectangle(cornerRadius: 25)
+                                
                                     .fill(.ultraThinMaterial)
+                                    
                                     .fill(Color.mint)
                                     .glassEffect(.clear)
                             )
@@ -93,6 +96,7 @@ struct ContentView: View {
                         SetReminderView(viewModel: viewModel)
                     }
                 }
+               
             }
             .navigationDestination(isPresented: $viewModel.shouldShowTodayReminder) {
                 TodayReminderView()
@@ -101,9 +105,15 @@ struct ContentView: View {
             }
             .preferredColorScheme(.dark)
         }
+        Button("Test Notification") {
+                   NotificationManager.shared.scheduleNotification(for: "Pothos", after: 5)
+               }
+        
     }
 }
 
 #Preview {
     ContentView()
 }
+
+

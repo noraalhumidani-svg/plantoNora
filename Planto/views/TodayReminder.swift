@@ -63,7 +63,7 @@ struct TodayReminderView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 24)
                 
-                // MARK: - Plant List
+              
                 List {
                     ForEach(viewModel.plants.indices, id: \.self) { index in
                         PlantRow(
@@ -78,8 +78,7 @@ struct TodayReminderView: View {
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
                                 viewModel.deletePlant(at: index)
-                                // Do NOT dismiss when last plant is deleted; keep user on this screen.
-                                // If you want, you can show an empty state when plants.isEmpty.
+                               
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
@@ -88,21 +87,21 @@ struct TodayReminderView: View {
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                         .listRowSeparator(.hidden)
                     }
-                    
-                    // Optional: Empty state row
-                    if viewModel.plants.isEmpty {
-                        VStack(spacing: 8) {
-                            Text("No plants yet")
-                                .font(.headline)
-                                .foregroundColor(.white.opacity(0.9))
-                            Text("Tap + to add a plant reminder")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    }
+                   
+                                        if viewModel.plants.isEmpty {
+                                            VStack(spacing: 8) {
+                                                Text("No plants yet")
+                                                    .font(.headline)
+                                                    .foregroundColor(.white.opacity(0.9))
+                                                Text("Tap + to add a plant reminder")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .frame(maxWidth: .infinity)
+                                            .listRowBackground(Color.clear)
+                                            .listRowSeparator(.hidden)
+                                        }
+                  
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
@@ -110,7 +109,7 @@ struct TodayReminderView: View {
                 Spacer()
             }
             
-            // MARK: - Floating Action Button
+            
             VStack {
                 Spacer()
                 HStack {
@@ -121,7 +120,7 @@ struct TodayReminderView: View {
                         Image(systemName: "plus")
                             .font(.title2)
                             .fontWeight(.semibold)
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .frame(width: 56, height: 56)
                             .background(Color(hex: 0x28E0A8))
                             .glassEffect(.clear)
@@ -157,14 +156,14 @@ struct TodayReminderView: View {
     }
 }
 
-// MARK: - Plant Row Component
+
 struct PlantRow: View {
     let plant: Plant
     let onToggle: () -> Void
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
-            // MARK: - Checkbox
+        
             Button(action: {
                 onToggle()
             }) {
@@ -189,7 +188,7 @@ struct PlantRow: View {
             .buttonStyle(PlainButtonStyle())
             .animation(.easeInOut(duration: 0.2), value: plant.isWatered)
             
-            // MARK: - Plant Details
+            
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 4) {
                     Image(systemName: "location.fill")
@@ -239,7 +238,7 @@ struct PlantRow: View {
     }
 }
 
-// MARK: - Color Extension
+
 private extension Color {
     init(hex rgb: UInt32, alpha: Double = 1.0) {
         let r = Double((rgb & 0xFF0000) >> 16) / 255.0

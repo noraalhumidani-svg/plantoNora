@@ -6,9 +6,13 @@
 //
 //MODEL
 import Foundation
+import SwiftData
 
-struct Plant: Identifiable, Codable, Equatable {
-    let id: UUID
+//struct Plant: Identifiable, Codable, Equatable
+@Model
+final class Plant{
+    @Attribute(.unique)
+    var id: UUID
     var name: String
     var location: String
     var sunlight: String

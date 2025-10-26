@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct SetReminderView: View {
-    // MARK: - ViewModel
+  
     @ObservedObject var viewModel: PlantsViewModel
     
-    // MARK: - Environment
+   
     @Environment(\.dismiss) var dismiss
     
-    // MARK: - State Properties
+  
     @State private var plantName: String = ""
     @State private var selectedRoom: String = "Bedroom"
     @State private var selectedLight: String = "Full sun"
@@ -24,15 +24,15 @@ struct SetReminderView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // MARK: - Background
+              
                 Color(red: 0x1C/255, green: 0x1C/255, blue: 0x1E/255)
                     .ignoresSafeArea()
                 
-                // MARK: - Form Content
+             
                 ScrollView {
                     VStack(spacing: 12) {
                         
-                        // MARK: - Plant Name Field
+                       
                         ZStack {
                             HStack {
                                 Text("  Plant Name")
@@ -50,7 +50,7 @@ struct SetReminderView: View {
                         }
                         Spacer(minLength: 15)
                         
-                        // MARK: - Room and Light Section
+                       
                         VStack(spacing: 0) {
                             // Room Picker
                             HStack {
@@ -110,7 +110,7 @@ struct SetReminderView: View {
                         )
                         Spacer(minLength: 15)
                         
-                        // MARK: - Watering Section
+                        
                         VStack(spacing: 0) {
                             // Watering Days Picker
                             HStack {
@@ -175,7 +175,7 @@ struct SetReminderView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // MARK: - Close Button
+               
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         dismiss()
@@ -188,14 +188,14 @@ struct SetReminderView: View {
                     }
                 }
                 
-                // MARK: - Title
+               
                 ToolbarItem(placement: .principal) {
                     Text("Set Reminder")
                         .foregroundColor(.white)
                         .font(.headline)
                 }
                 
-                // MARK: - Save Button (Checkmark)
+              
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         // Create new plant with form data
@@ -214,13 +214,12 @@ struct SetReminderView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
-                           
+                            .foregroundColor(.white)
+                            .font(.system(size: 16, weight: .bold))
                             .frame(width: 32, height: 32)
-                           
-                            
                     }.buttonStyle(.borderedProminent)
-                        .tint(.green)
-                        .clipShape(Circle())
+                        .tint(.mint)
+                       
                 }
             }
         }

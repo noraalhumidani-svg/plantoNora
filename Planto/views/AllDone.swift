@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct AllDoneView: View {
-    // MARK: - ViewModel
+   
     @EnvironmentObject var viewModel: PlantsViewModel
     
-    // MARK: - Environment
+    
     @Environment(\.dismiss) var dismiss
     
-    // MARK: - State Properties
+   
     @State private var showSetReminderSheet = false
     @State private var navigateToTodayReminder = false
     @State private var editingPlant: Plant? = nil
@@ -72,7 +72,7 @@ struct AllDoneView: View {
                 Spacer()
             }
             
-            // MARK: - Floating Action Button
+            
             VStack {
                 Spacer()
                 HStack {
@@ -85,10 +85,11 @@ struct AllDoneView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .frame(width: 56, height: 56)
+                            .tint(.mint)
                             .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
-                            .tint(.green)
+                           
                     }
+                    
                     .glassEffect(.clear)
                     .padding(.trailing, 24)
                     .padding(.bottom, 24)
@@ -97,7 +98,7 @@ struct AllDoneView: View {
         }
         .navigationBarBackButtonHidden(true)
         .preferredColorScheme(.dark)
-        // MARK: - Add New Plant Sheet
+        
         .sheet(isPresented: $showSetReminderSheet) {
             SetReminderView(viewModel: viewModel)
                 .onDisappear {
@@ -115,7 +116,7 @@ struct AllDoneView: View {
                     // (dismiss here dismisses the sheet scope automatically after onDisappear)
                 }
         }
-        // MARK: - Edit Plant Sheet
+       
         .sheet(item: $editingPlant) { plant in
             SetReminderEditView(
                 viewModel: viewModel,
@@ -129,7 +130,7 @@ struct AllDoneView: View {
     }
 }
 
-// MARK: - Color Extension
+
 private extension Color {
     init(hex rgb: UInt32, alpha: Double = 1.0) {
         let r = Double((rgb & 0xFF0000) >> 16) / 255.0
@@ -143,3 +144,5 @@ private extension Color {
     AllDoneView()
         .environmentObject(PlantsViewModel())
 }
+
+
