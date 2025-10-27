@@ -1,9 +1,3 @@
-//
-//  ContentView.swift
-//  Planto
-//
-//  MVVM - View Layer (Splash Screen)
-//
 
 import SwiftUI
 import SwiftData
@@ -11,6 +5,7 @@ import SwiftData
 struct ContentView: View {
     
     @StateObject private var viewModel = PlantsViewModel()
+    //swiftdata
     @Environment(\.modelContext) private var context
     
     @State private var showSetReminderSheet = false

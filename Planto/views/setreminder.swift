@@ -164,9 +164,9 @@ struct SetReminderView: View {
                             .padding(.vertical, 4.5)
                             .padding(.horizontal)
                         }
-                        .background(
-                            RoundedRectangle(cornerRadius: 30)
-                                .fill(Color(red: 0.2, green: 0.2, blue: 0.2))
+                      .background(
+                           RoundedRectangle(cornerRadius: 30)
+                               .fill(Color(red: 0.2, green: 0.2, blue: 0.2))
                         )
                     }
                     .padding(.horizontal, 20)

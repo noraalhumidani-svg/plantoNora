@@ -10,11 +10,9 @@ import SwiftUI
 struct TodayReminderView: View {
     
     @EnvironmentObject var viewModel: PlantsViewModel
-    
    
     @Environment(\.dismiss) var dismiss
     
-  
     @State private var editingPlant: Plant? = nil
     @State private var showingSetReminder = false
     
@@ -72,9 +70,12 @@ struct TodayReminderView: View {
                                 viewModel.toggleWatered(at: index)
                             }
                         )
-                        .onTapGesture {
+                        //click to edit plant
+                    .onTapGesture {
                             editingPlant = viewModel.plants[index]
-                        }
+                       }
+                        
+                        //swipe to delete
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
                                 viewModel.deletePlant(at: index)
@@ -87,7 +88,7 @@ struct TodayReminderView: View {
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                         .listRowSeparator(.hidden)
                     }
-                   
+                   //if plants are empty
                                         if viewModel.plants.isEmpty {
                                             VStack(spacing: 8) {
                                                 Text("No plants yet")
@@ -114,6 +115,7 @@ struct TodayReminderView: View {
                 Spacer()
                 HStack {
                     Spacer()
+                    //show sheet on button click
                     Button(action: {
                         showingSetReminder = true
                     }) {
@@ -143,7 +145,7 @@ struct TodayReminderView: View {
                 onDelete: {
                     viewModel.deletePlant(withId: plant.id)
                     editingPlant = nil
-                    // Do not dismiss the TodayReminderView
+                    
                 }
             )
         }

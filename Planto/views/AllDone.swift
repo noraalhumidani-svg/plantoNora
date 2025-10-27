@@ -1,9 +1,3 @@
-//
-//  AllDoneView.swift
-//  Planto
-//
-//  MVVM - View Layer (Completion Screen)
-//
 
 import SwiftUI
 
@@ -11,21 +5,19 @@ struct AllDoneView: View {
    
     @EnvironmentObject var viewModel: PlantsViewModel
     
-    
     @Environment(\.dismiss) var dismiss
     
-   
     @State private var showSetReminderSheet = false
     @State private var navigateToTodayReminder = false
     @State private var editingPlant: Plant? = nil
     
     var body: some View {
         ZStack {
-            // MARK: - Background
+          
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // MARK: - Title
+               
                 HStack {
                     Text("My Plants 🌱")
                         .font(.largeTitle)
@@ -37,22 +29,22 @@ struct AllDoneView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 8)
                 
-                // MARK: - Divider
+               
                 Divider()
                     .background(Color.gray.opacity(0.9))
                     .padding(.top, -1)
                 
                 Spacer(minLength: 20)
                 
-                // MARK: - Celebration Image
+                
                 Image("plantoIMGwink")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: 164, maxHeight: 200)
-                    .padding(.top, 10)
+                    .padding(.top, -50)
                 
-                // MARK: - Celebration Text
-                VStack(spacing: 10) {
+              
+                VStack(spacing: 20) {
                     Text("All Done! 🎉")
                         .font(.title2)
                         .fontWeight(.semibold)
@@ -111,13 +103,12 @@ struct AllDoneView: View {
                     // Ensure we are not stuck on AllDone and that TodayReminder stays visible
                     viewModel.shouldShowAllDone = false
                     viewModel.shouldShowTodayReminder = true
-                    
-                    // Close the sheet (not the navigation)
-                    // (dismiss here dismisses the sheet scope automatically after onDisappear)
+                   
                 }
         }
        
         .sheet(item: $editingPlant) { plant in
+            //show set reminder sheet
             SetReminderEditView(
                 viewModel: viewModel,
                 existingPlant: plant,
@@ -131,14 +122,6 @@ struct AllDoneView: View {
 }
 
 
-private extension Color {
-    init(hex rgb: UInt32, alpha: Double = 1.0) {
-        let r = Double((rgb & 0xFF0000) >> 16) / 255.0
-        let g = Double((rgb & 0x00FF00) >> 8) / 255.0
-        let b = Double(rgb & 0x0000FF) / 255.0
-        self = Color(red: r, green: g, blue: b).opacity(alpha)
-    }
-}
 
 #Preview {
     AllDoneView()

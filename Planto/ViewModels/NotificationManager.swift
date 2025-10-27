@@ -30,7 +30,7 @@ class NotificationManager {
         content.title = "Hey! Let's water your plant"
         content.sound = .default
         
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
         
         let request = UNNotificationRequest(
             identifier: UUID().uuidString,

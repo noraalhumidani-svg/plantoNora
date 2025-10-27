@@ -67,21 +67,20 @@ struct SetReminderEditView: View {
                         Spacer(minLength: 15)
                         
                      
-                        VStack(spacing: 0) {
+        VStack(spacing: 0) {
                             // Room Picker
-                            HStack {
-                                Image(systemName: "location.fill")
-                                    .foregroundColor(.white)
-                                    .frame(width: 20)
+        HStack {
+        Image(systemName: "location.fill")
+        .foregroundColor(.white)
+        .frame(width: 20)
                                 
-                                Text("Room")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 18))
+     Text("Room")
+    .foregroundColor(.white)
+    .font(.system(size: 18))
                                 
-                                Spacer()
+    Spacer()
                                 
-                                Picker("", selection: $selectedRoom) {
-                                    Text("Bedroom").tag("Bedroom")
+                                Picker("", selection: $selectedRoom) {Text("Bedroom").tag("Bedroom")
                                     Text("Living Room").tag("Living Room")
                                     Text("Kitchen").tag("Kitchen")
                                     Text("Bathroom").tag("Bathroom")

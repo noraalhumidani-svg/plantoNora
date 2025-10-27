@@ -8,10 +8,8 @@
 import Foundation
 import SwiftData
 
-//struct Plant: Identifiable, Codable, Equatable
-@Model
-final class Plant{
-    @Attribute(.unique)
+struct Plant: Identifiable, Codable, Equatable{
+  
     var id: UUID
     var name: String
     var location: String
