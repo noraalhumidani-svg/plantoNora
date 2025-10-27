@@ -85,5 +85,5 @@ Planto helps you:
 
 ## 🚀 How to Run
 
-1. Clone this repository  
+[1. Clone this repository  ](https://github.com/noraalhumidani-svg/plantoNora/tree/main/Planto.xcodeproj)
   
